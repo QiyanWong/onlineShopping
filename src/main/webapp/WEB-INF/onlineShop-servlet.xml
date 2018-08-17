@@ -29,4 +29,3 @@
 
 	<mvc:resources mapping="/resource/**" location="/WEB-INF/resource/" />
 </beans>
-
