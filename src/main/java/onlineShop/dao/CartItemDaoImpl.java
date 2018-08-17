@@ -1,40 +1,48 @@
 
 package onlineShop.dao;
 
+import java.util.List;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import onlineShop.model.Authorities;
 import onlineShop.model.Cart;
-import onlineShop.model.Customer;
-import onlineShop.model.User;
+import onlineShop.model.CartItem;
 
 @Repository
-public class CustomerDaoImpl implements CustomerDao {
-
+public class CartItemDaoImpl implements CartItemDao {
     @Autowired
     private SessionFactory sessionFactory;
 
-    public void addCustomer(Customer customer) {
-   	 customer.getUser().setEnabled(true);
-
-   	 Authorities authorities = new Authorities();
-   	 authorities.setAuthorities("ROLE_USER");
-   	 authorities.setEmailId(customer.getUser().getEmailId());
-
-   	 Cart cart = new Cart();
-   	 customer.setCart(cart);
-   	 cart.setCustomer(customer);
-
+    public void addCartItem(CartItem cartItem) {
    	 Session session = null;
+
    	 try {
    		 session = sessionFactory.openSession();
    		 session.beginTransaction();
-   		 session.save(authorities);
-   		 session.save(customer);
+   		 session.saveOrUpdate(cartItem);
+   		 session.getTransaction().commit();
+   	 } catch (Exception e) {
+   		 e.printStackTrace();
+   	 } finally {
+   		 if (session != null) {
+   			 session.close();
+   		 }
+   	 }
+    }
+
+    public void removeCartItem(int CartItemId) {
+   	 Session session = null;
+   	 try {
+   		 session = sessionFactory.openSession();
+   		 CartItem cartItem = (CartItem) session.get(CartItem.class, CartItemId);
+   		 Cart cart = cartItem.getCart();
+   		 List<CartItem> cartItems = cart.getCartItem();
+   		 cartItems.remove(cartItem);
+   		 session.beginTransaction();
+   		 session.delete(cartItem);
    		 session.getTransaction().commit();
    	 } catch (Exception e) {
    		 e.printStackTrace();
@@ -45,22 +53,10 @@ public class CustomerDaoImpl implements CustomerDao {
    	 }
     }
 
-    public Customer getCustomerByUserName(String userName) {
-   	 Session session = null;
-   	 User user = null;
-   	 try {
-   		 session = sessionFactory.openSession();
-   		 session.beginTransaction();
-   		 user = (User)session.createCriteria(User.class).add(Restrictions.eq("emailId", userName)).uniqueResult();
-   		 session.getTransaction().commit();
-   	 } catch (Exception e) {
-   		 e.printStackTrace();
-   	 } finally {
-   		 if(session != null) {
-   			 session.close();
-   		 }
+    public void removeAllCartItems(Cart cart) {
+   	 List<CartItem> cartItems = cart.getCartItem();
+   	 for (CartItem cartItem : cartItems) {
+   		 removeCartItem(cartItem.getId());
    	 }
-   	 if(user != null) return user.getCustomer();
-   	 return null;
     }
 }
