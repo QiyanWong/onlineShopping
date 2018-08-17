@@ -16,7 +16,6 @@ public class CustomerServiceImpl implements CustomerService {
    	 customerDao.addCustomer(customer);
     }
 
-    @Override
     public Customer getCustomerByUserName(String userName) {
    	 return customerDao.getCustomerByUserName(userName);
     }

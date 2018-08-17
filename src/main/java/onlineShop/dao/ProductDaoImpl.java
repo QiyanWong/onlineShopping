@@ -18,7 +18,7 @@ public class ProductDaoImpl implements ProductDao {
 
     public List<Product> getAllProducts() {
    	 Session session = null;
-   	 List<Product> products = new ArrayList<>();
+   	 List<Product> products = new ArrayList<Product>();
    	 try {
    		 session = sessionFactory.openSession();
    		 session.beginTransaction();
